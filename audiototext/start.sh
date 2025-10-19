@@ -2,7 +2,7 @@
 # Скрипт для активации виртуального окружения и запуска
 
 echo "🎵 Активируем виртуальное окружение..."
-cd "/Users/stam7/Documents/Coding Workspace/audiototext"
+cd "/Users/stam7/Documents/Coding Workspace/AruuNote/audiototext"
 source venv/bin/activate
 
 echo "✅ Виртуальное окружение активировано!"

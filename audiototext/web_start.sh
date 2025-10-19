@@ -2,7 +2,7 @@
 # Скрипт для запуска веб-интерфейса
 
 echo "🌐 Запускаем веб-интерфейс..."
-cd "/Users/stam7/Documents/Coding Workspace/audiototext"
+cd "/Users/stam7/Documents/Coding Workspace/AruuNote/audiototext"
 source venv/bin/activate
 
 echo "✅ Виртуальное окружение активировано!"
