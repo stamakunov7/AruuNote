@@ -1,0 +1,499 @@
+<!DOCTYPE html>
+<html lang="ru">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Преобразователь аудио в текст</title>
+    <style>
+        * {
+            margin: 0;
+            padding: 0;
+            box-sizing: border-box;
+        }
+        
+        body {
+            font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            min-height: 100vh;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            padding: 20px;
+        }
+        
+        .container {
+            background: white;
+            border-radius: 20px;
+            box-shadow: 0 20px 40px rgba(0,0,0,0.1);
+            padding: 40px;
+            max-width: 800px;
+            width: 100%;
+        }
+        
+        h1 {
+            text-align: center;
+            color: #333;
+            margin-bottom: 30px;
+            font-size: 2.5em;
+        }
+        
+        .upload-area {
+            border: 3px dashed #667eea;
+            border-radius: 15px;
+            padding: 40px;
+            text-align: center;
+            margin-bottom: 30px;
+            transition: all 0.3s ease;
+            cursor: pointer;
+        }
+        
+        .upload-area:hover {
+            border-color: #764ba2;
+            background-color: #f8f9ff;
+        }
+        
+        .upload-area.dragover {
+            border-color: #764ba2;
+            background-color: #f0f0ff;
+        }
+        
+        .upload-icon {
+            font-size: 3em;
+            color: #667eea;
+            margin-bottom: 20px;
+        }
+        
+        .upload-text {
+            font-size: 1.2em;
+            color: #666;
+            margin-bottom: 20px;
+        }
+        
+        .file-input {
+            display: none;
+        }
+        
+        .model-selector {
+            margin-bottom: 30px;
+        }
+        
+        .model-selector label {
+            display: block;
+            margin-bottom: 10px;
+            font-weight: bold;
+            color: #333;
+        }
+        
+        .model-selector select {
+            width: 100%;
+            padding: 12px;
+            border: 2px solid #ddd;
+            border-radius: 8px;
+            font-size: 1em;
+            background: white;
+        }
+        
+        .model-info {
+            font-size: 0.9em;
+            color: #666;
+            margin-top: 5px;
+        }
+        
+        .process-btn {
+            width: 100%;
+            padding: 15px;
+            background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+            color: white;
+            border: none;
+            border-radius: 10px;
+            font-size: 1.2em;
+            font-weight: bold;
+            cursor: pointer;
+            transition: all 0.3s ease;
+            margin-bottom: 30px;
+        }
+        
+        .process-btn:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 10px 20px rgba(102, 126, 234, 0.3);
+        }
+        
+        .process-btn:disabled {
+            background: #ccc;
+            cursor: not-allowed;
+            transform: none;
+            box-shadow: none;
+        }
+        
+        .result-area {
+            display: none;
+            margin-top: 30px;
+        }
+        
+        .result-text {
+            background: #f8f9ff;
+            border: 2px solid #e0e0ff;
+            border-radius: 10px;
+            padding: 20px;
+            font-size: 1.1em;
+            line-height: 1.6;
+            color: #333;
+            white-space: pre-wrap;
+            max-height: 400px;
+            overflow-y: auto;
+        }
+        
+        .download-btn {
+            background: #28a745;
+            color: white;
+            border: none;
+            padding: 12px 24px;
+            border-radius: 8px;
+            font-size: 1em;
+            cursor: pointer;
+            margin-top: 15px;
+            transition: all 0.3s ease;
+        }
+        
+        .download-btn:hover {
+            background: #218838;
+            transform: translateY(-1px);
+        }
+        
+        .loading {
+            display: none;
+            text-align: center;
+            margin: 20px 0;
+        }
+        
+        .spinner {
+            border: 4px solid #f3f3f3;
+            border-top: 4px solid #667eea;
+            border-radius: 50%;
+            width: 40px;
+            height: 40px;
+            animation: spin 1s linear infinite;
+            margin: 0 auto 10px;
+        }
+        
+        @keyframes spin {
+            0% { transform: rotate(0deg); }
+            100% { transform: rotate(360deg); }
+        }
+        
+        .error {
+            background: #f8d7da;
+            color: #721c24;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid #f5c6cb;
+        }
+        
+        .success {
+            background: #d4edda;
+            color: #155724;
+            padding: 15px;
+            border-radius: 8px;
+            margin: 20px 0;
+            border: 1px solid #c3e6cb;
+        }
+        
+        .language-switch {
+            position: fixed;
+            top: 20px;
+            right: 20px;
+            background: #f0f0f0;
+            border: 2px solid #ddd;
+            border-radius: 25px;
+            padding: 4px;
+            cursor: pointer;
+            font-weight: bold;
+            transition: all 0.3s ease;
+            z-index: 1000;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            display: flex;
+            align-items: center;
+            min-width: 80px;
+        }
+        
+        .language-option {
+            padding: 6px 12px;
+            border-radius: 20px;
+            transition: all 0.3s ease;
+            font-size: 0.9em;
+            color: #666;
+            cursor: pointer;
+            user-select: none;
+        }
+        
+        .language-option.active {
+            background: #667eea;
+            color: white;
+            box-shadow: 0 2px 8px rgba(102, 126, 234, 0.3);
+            transform: scale(1.05);
+        }
+        
+        .language-option:hover:not(.active) {
+            background: #e0e0e0;
+            color: #333;
+        }
+        
+        .language-switch:hover {
+            transform: translateY(-2px);
+            box-shadow: 0 6px 16px rgba(102, 126, 234, 0.2);
+        }
+    </style>
+</head>
+<body>
+    <div class="language-switch" id="languageSwitch">
+        <div class="language-option active" id="ruOption" onclick="setLanguage('ru')">RUS</div>
+        <div class="language-option" id="enOption" onclick="setLanguage('en')">ENG</div>
+    </div>
+    
+    <div class="container">
+        <h1 data-ru="🎵 Преобразователь для блондинки Аруукешки❤️" data-en="🎵 Audio to Text Converter for Blonde Aruukeshka❤️">🎵 Преобразователь для блондинки Аруукешки❤️</h1>
+        
+        <div class="upload-area" id="uploadArea">
+            <div class="upload-icon">👱🏻‍♀️</div>
+            <div class="upload-text" data-ru="Перетащите аудиофайл сюда или нажмите для выбора" data-en="Drag audio file here or click to select">
+                Перетащите аудиофайл сюда или нажмите для выбора
+            </div>
+            <input type="file" id="fileInput" class="file-input" accept="audio/*">
+        </div>
+        
+        <div class="model-selector">
+            <label for="modelSelect" data-ru="Выберите модель:" data-en="Select model:">Выберите модель:</label>
+            <select id="modelSelect">
+                <option value="tiny" data-ru="Блонди Tiny (быстро, менее точно)" data-en="Blondie Tiny (fast, less accurate)">Блонди Tiny (быстро, менее точно)</option>
+                <option value="base" selected data-ru="Блонди Base (баланс скорости и точности)" data-en="Blondie Base (balance of speed and accuracy)">Блонди Base (баланс скорости и точности)</option>
+                <option value="small" data-ru="Блонди Small (более точно)" data-en="Blondie Small (more accurate)">Блонди Small (более точно)</option>
+                <option value="medium" data-ru="Блонди Medium (очень точно)" data-en="Blondie Medium (very accurate)">Блонди Medium (очень точно)</option>
+                <option value="large" data-ru="Блонди Large (максимальная точность)" data-en="Blondie Large (maximum accuracy)">Блонди Large (максимальная точность)</option>
+            </select>
+            <div class="model-info" data-ru="Большие модели дают лучший результат, но работают медленнее" data-en="Larger models give better results but work slower">
+                Большие модели дают лучший результат, но работают медленнее
+            </div>
+        </div>
+        
+        <button class="process-btn" id="processBtn" onclick="processAudio()" data-ru="🚀 Преобразовать аудио в текст для Аруукешки" data-en="🚀 Convert audio to text for Aruukeshka">
+            🚀 Преобразовать аудио в текст для Аруукешки
+        </button>
+        
+        <div class="loading" id="loading">
+            <div class="spinner"></div>
+            <div data-ru="Обрабатываем аудио... Это может занять несколько минут" data-en="Processing audio... This may take several minutes">Обрабатываем аудио... Это может занять несколько минут</div>
+        </div>
+        
+        <div class="result-area" id="resultArea">
+            <h3 data-ru="Результат транскрипции:" data-en="Transcription result:">Результат транскрипции:</h3>
+            <div class="result-text" id="resultText"></div>
+            <button class="download-btn" id="downloadBtn" onclick="downloadText()" data-ru="📥 Скачать текст" data-en="📥 Download text">
+                📥 Скачать текст
+            </button>
+        </div>
+    </div>
+
+    <script>
+        const uploadArea = document.getElementById('uploadArea');
+        const fileInput = document.getElementById('fileInput');
+        const processBtn = document.getElementById('processBtn');
+        const loading = document.getElementById('loading');
+        const resultArea = document.getElementById('resultArea');
+        const resultText = document.getElementById('resultText');
+        const downloadBtn = document.getElementById('downloadBtn');
+        const ruOption = document.getElementById('ruOption');
+        const enOption = document.getElementById('enOption');
+        
+        let selectedFile = null;
+        let transcriptionResult = '';
+        let currentLanguage = 'ru'; // По умолчанию русский
+        
+        // Функция установки языка
+        function setLanguage(lang) {
+            currentLanguage = lang;
+            
+            // Обновляем активное состояние кнопок
+            if (lang === 'ru') {
+                ruOption.classList.add('active');
+                enOption.classList.remove('active');
+            } else {
+                ruOption.classList.remove('active');
+                enOption.classList.add('active');
+            }
+            
+            // Обновляем все элементы с атрибутами data-ru и data-en
+            const elements = document.querySelectorAll('[data-ru][data-en]');
+            elements.forEach(element => {
+                const text = currentLanguage === 'ru' ? 
+                    element.getAttribute('data-ru') : 
+                    element.getAttribute('data-en');
+                element.textContent = text;
+            });
+            
+            // Обновляем опции в select
+            const selectOptions = document.querySelectorAll('#modelSelect option');
+            selectOptions.forEach(option => {
+                const text = currentLanguage === 'ru' ? 
+                    option.getAttribute('data-ru') : 
+                    option.getAttribute('data-en');
+                option.textContent = text;
+            });
+            
+            // Сохраняем выбранный язык в localStorage
+            localStorage.setItem('language', currentLanguage);
+        }
+        
+        // Загружаем сохраненный язык при загрузке страницы
+        window.addEventListener('load', () => {
+            const savedLanguage = localStorage.getItem('language');
+            if (savedLanguage) {
+                setLanguage(savedLanguage);
+            }
+        });
+        
+        // Обработка drag & drop
+        uploadArea.addEventListener('dragover', (e) => {
+            e.preventDefault();
+            uploadArea.classList.add('dragover');
+        });
+        
+        uploadArea.addEventListener('dragleave', () => {
+            uploadArea.classList.remove('dragover');
+        });
+        
+        uploadArea.addEventListener('drop', (e) => {
+            e.preventDefault();
+            uploadArea.classList.remove('dragover');
+            const files = e.dataTransfer.files;
+            if (files.length > 0) {
+                handleFileSelect(files[0]);
+            }
+        });
+        
+        uploadArea.addEventListener('click', () => {
+            fileInput.click();
+        });
+        
+        fileInput.addEventListener('change', (e) => {
+            if (e.target.files.length > 0) {
+                handleFileSelect(e.target.files[0]);
+            }
+        });
+        
+        function handleFileSelect(file) {
+            if (!file.type.startsWith('audio/')) {
+                const errorMsg = currentLanguage === 'ru' ? 'Пожалуйста, выберите аудиофайл' : 'Please select an audio file';
+                showError(errorMsg);
+                return;
+            }
+            
+            selectedFile = file;
+            const fileSelectedText = currentLanguage === 'ru' ? 'Выбран файл:' : 'Selected file:';
+            uploadArea.innerHTML = `
+                <div class="upload-icon">✅</div>
+                <div class="upload-text">${fileSelectedText} ${file.name}</div>
+            `;
+            resultArea.style.display = 'none';
+        }
+        
+        async function processAudio() {
+            if (!selectedFile) {
+                const errorMsg = currentLanguage === 'ru' ? 'Пожалуйста, выберите аудиофайл' : 'Please select an audio file';
+                showError(errorMsg);
+                return;
+            }
+            
+            const modelSize = document.getElementById('modelSelect').value;
+            
+            processBtn.disabled = true;
+            loading.style.display = 'block';
+            resultArea.style.display = 'none';
+            
+            const formData = new FormData();
+            formData.append('audio', selectedFile);
+            formData.append('model_size', modelSize);
+            
+            try {
+                const response = await fetch('/upload', {
+                    method: 'POST',
+                    body: formData
+                });
+                
+                const result = await response.json();
+                
+                if (result.success) {
+                    transcriptionResult = result.text;
+                    resultText.textContent = result.text;
+                    resultArea.style.display = 'block';
+                    const successMsg = currentLanguage === 'ru' ? 
+                        `Транскрипция завершена! Язык: ${result.language || 'неизвестен'}` :
+                        `Transcription completed! Language: ${result.language || 'unknown'}`;
+                    showSuccess(successMsg);
+                } else {
+                    const errorMsg = currentLanguage === 'ru' ? 
+                        (result.error || 'Произошла ошибка при обработке') :
+                        (result.error || 'An error occurred during processing');
+                    showError(errorMsg);
+                }
+            } catch (error) {
+                const networkError = currentLanguage === 'ru' ? 'Ошибка сети: ' : 'Network error: ';
+                showError(networkError + error.message);
+            } finally {
+                processBtn.disabled = false;
+                loading.style.display = 'none';
+            }
+        }
+        
+        function downloadText() {
+            if (!transcriptionResult) return;
+            
+            const blob = new Blob([transcriptionResult], { type: 'text/plain;charset=utf-8' });
+            const url = URL.createObjectURL(blob);
+            const a = document.createElement('a');
+            a.href = url;
+            a.download = 'transcription.txt';
+            document.body.appendChild(a);
+            a.click();
+            document.body.removeChild(a);
+            URL.revokeObjectURL(url);
+        }
+        
+        function showError(message) {
+            const errorDiv = document.createElement('div');
+            errorDiv.className = 'error';
+            errorDiv.textContent = message;
+            
+            // Удаляем предыдущие сообщения об ошибках
+            const existingError = document.querySelector('.error');
+            if (existingError) {
+                existingError.remove();
+            }
+            
+            document.querySelector('.container').appendChild(errorDiv);
+            
+            setTimeout(() => {
+                errorDiv.remove();
+            }, 5000);
+        }
+        
+        function showSuccess(message) {
+            const successDiv = document.createElement('div');
+            successDiv.className = 'success';
+            successDiv.textContent = message;
+            
+            // Удаляем предыдущие сообщения
+            const existingSuccess = document.querySelector('.success');
+            if (existingSuccess) {
+                existingSuccess.remove();
+            }
+            
+            document.querySelector('.container').appendChild(successDiv);
+            
+            setTimeout(() => {
+                successDiv.remove();
+            }, 3000);
+        }
+    </script>
+</body>
+</html>
