@@ -143,6 +143,13 @@
             overflow-y: auto;
         }
         
+        .download-buttons {
+            display: flex;
+            gap: 10px;
+            margin-top: 15px;
+            flex-wrap: wrap;
+        }
+        
         .download-btn {
             background: #28a745;
             color: white;
@@ -151,13 +158,30 @@
             border-radius: 8px;
             font-size: 1em;
             cursor: pointer;
-            margin-top: 15px;
             transition: all 0.3s ease;
+            flex: 1;
+            min-width: 150px;
         }
         
         .download-btn:hover {
             background: #218838;
             transform: translateY(-1px);
+        }
+        
+        .download-btn:nth-child(2) {
+            background: #007bff;
+        }
+        
+        .download-btn:nth-child(2):hover {
+            background: #0056b3;
+        }
+        
+        .download-btn:nth-child(3) {
+            background: #6f42c1;
+        }
+        
+        .download-btn:nth-child(3):hover {
+            background: #5a32a3;
         }
         
         .loading {
@@ -288,9 +312,17 @@
         <div class="result-area" id="resultArea">
             <h3 data-ru="Результат транскрипции:" data-en="Transcription result:">Результат транскрипции:</h3>
             <div class="result-text" id="resultText"></div>
-            <button class="download-btn" id="downloadBtn" onclick="downloadText()" data-ru="📥 Скачать текст" data-en="📥 Download text">
-                📥 Скачать текст
-            </button>
+            <div class="download-buttons">
+                <button class="download-btn" id="downloadTxtBtn" onclick="downloadText('txt')" data-ru="📥 Скачать TXT" data-en="📥 Download TXT">
+                    📥 Скачать TXT
+                </button>
+                <button class="download-btn" id="downloadSrtBtn" onclick="downloadText('srt')" data-ru="📥 Скачать SRT" data-en="📥 Download SRT">
+                    📥 Скачать SRT
+                </button>
+                <button class="download-btn" id="downloadVttBtn" onclick="downloadText('vtt')" data-ru="📥 Скачать WebVTT" data-en="📥 Download WebVTT">
+                    📥 Скачать WebVTT
+                </button>
+            </div>
         </div>
     </div>
 
@@ -301,12 +333,12 @@
         const loading = document.getElementById('loading');
         const resultArea = document.getElementById('resultArea');
         const resultText = document.getElementById('resultText');
-        const downloadBtn = document.getElementById('downloadBtn');
         const ruOption = document.getElementById('ruOption');
         const enOption = document.getElementById('enOption');
         
         let selectedFile = null;
         let transcriptionResult = '';
+        let transcriptionId = null;
         let currentLanguage = 'ru'; // По умолчанию русский
         
         // Функция установки языка
@@ -338,6 +370,17 @@
                     option.getAttribute('data-ru') : 
                     option.getAttribute('data-en');
                 option.textContent = text;
+            });
+            
+            // Обновляем кнопки скачивания
+            const downloadButtons = document.querySelectorAll('.download-btn');
+            downloadButtons.forEach(btn => {
+                if (btn.hasAttribute('data-ru') && btn.hasAttribute('data-en')) {
+                    const text = currentLanguage === 'ru' ? 
+                        btn.getAttribute('data-ru') : 
+                        btn.getAttribute('data-en');
+                    btn.textContent = text;
+                }
             });
             
             // Сохраняем выбранный язык в localStorage
@@ -424,6 +467,7 @@
                 
                 if (result.success) {
                     transcriptionResult = result.text;
+                    transcriptionId = result.transcription_id;
                     resultText.textContent = result.text;
                     resultArea.style.display = 'block';
                     const successMsg = currentLanguage === 'ru' ? 
@@ -445,18 +489,17 @@
             }
         }
         
-        function downloadText() {
-            if (!transcriptionResult) return;
+        function downloadText(format) {
+            if (!transcriptionId) {
+                const errorMsg = currentLanguage === 'ru' ? 
+                    'Нет данных для скачивания' : 'No data to download';
+                showError(errorMsg);
+                return;
+            }
             
-            const blob = new Blob([transcriptionResult], { type: 'text/plain;charset=utf-8' });
-            const url = URL.createObjectURL(blob);
-            const a = document.createElement('a');
-            a.href = url;
-            a.download = 'transcription.txt';
-            document.body.appendChild(a);
-            a.click();
-            document.body.removeChild(a);
-            URL.revokeObjectURL(url);
+            // Для формата TXT скачиваем напрямую с сервера
+            // Для SRT и VTT тоже используем сервер
+            window.location.href = `/download/${transcriptionId}/${format}`;
         }
         
         function showError(message) {
