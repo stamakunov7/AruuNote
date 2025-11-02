@@ -3,14 +3,11 @@
 AruuNote is a simple yet powerful tool for converting audio into text using **OpenAI Whisper**.  
 Originally created for my girlfriend **Aruuke**, it’s now available for every student who wants to study smarter, not harder.
 
-<h2 align="center">🎥 Project Demo</h2>
-<p align="center">
-  <a href="https://youtu.be/6RxnuA61fRI" target="_blank">
-    <img src="https://img.youtube.com/vi/6RxnuA61fRI/hqdefault.jpg" 
-         alt="Watch the demo" width="70%" style="border-radius:10px;">
-  </a>
-</p>
-<p align="center"><em>Click to watch the demo on YouTube</em></p>
+## 🎥 Project Demo
+
+[![Watch the demo](https://img.youtube.com/vi/6RxnuA61fRI/hqdefault.jpg)](https://youtu.be/6RxnuA61fRI)
+
+> Click the image to watch the demo on YouTube.
 
 ---
 
