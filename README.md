@@ -6,7 +6,7 @@ Originally created for my girlfriend **Aruuke**, it’s now available for every 
 <h2 align="center">🎥 Project Demo</h2>
 <p align="center">
   <a href="https://youtu.be/6RxnuA61fRI" target="_blank">
-    <img src="https://img.youtube.com/vi/6RxnuA61fRI/maxresdefault.jpg" 
+    <img src="https://img.youtube.com/vi/6RxnuA61fRI/hqdefault.jpg" 
          alt="Watch the demo" width="70%" style="border-radius:10px;">
   </a>
 </p>
