@@ -5,7 +5,7 @@ Originally created for my girlfriend **Aruuke**, it’s now available for every 
 
 ## 🎥 Project Demo
 
-[![Watch the demo](https://img.youtube.com/vi/6RxnuA61fRI/hqdefault.jpg)](https://youtu.be/6RxnuA61fRI)
+[Watch the demo](https://img.youtube.com/vi/6RxnuA61fRI/hqdefault.jpg)(https://youtu.be/6RxnuA61fRI)
 
 > Click the image to watch the demo on YouTube.
 
